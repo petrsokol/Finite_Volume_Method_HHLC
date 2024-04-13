@@ -150,16 +150,18 @@ int main() {
     double t = 0;
     int reps = 0;
     double rezi = 1;
-    std::string NAME = "231226_naca";
+    std::string NAME = "240219_subsonic";
     while (rezi > Def::EPSILON && !Def::error && reps < 30000) {
         reps++;
-//        double dt = Scheme::computeDT(cells, 0.5);
-//        std::unordered_map<int, double> deltaT = Scheme::LocalTimeStep(cells, 0.5);
-//        t += dt;
+        /* GLOBAL TIME STEP
+        double dt = Scheme::computeDT(cells, 0.5);
+        std::unordered_map<int, double> deltaT = Scheme::LocalTimeStep(cells, 0.5);
+        t += dt;
+         */
         Scheme::updateCellDT(cells, 0.5);
 
         NACA::updateBounds(cells, faces);
-//        Scheme::computeHLLC(cells, faces, dt);
+//        Scheme::computeHLLC(cells, faces, dt); // GLOBAL TIME STEP
         Scheme::computeHLLC_localTimeStep(cells, faces);
 
         rezi = Scheme::computeRezi_localTimeStep(cells);
@@ -179,20 +181,45 @@ int main() {
                 outputFile << cells.at(k).tx << ", " << cells.at(k).ty << ", 1, " << mach << "\n";
             } outputFile.close();
             std::cout << "timestep " << reps << " recorded successfully" << std::endl;
+
+            std::ofstream ofstreamMach(Def::defaultPath + "\\" + NAME + "_mach_" + std::to_string(reps) + ".dat");
+            std::ofstream ofstreamPressure(Def::defaultPath + "\\" + NAME + "_pressure_" + std::to_string(reps) + ".dat");
+            for (int j = 0; j < NACA::wingLength; ++j) {
+                int k = Def::xCells * Def::gl + Def::gl + NACA::wingStart + j;
+                Primitive primitive = Primitive::computePV(cells.at(k).w);
+                double localMachNumber = primitive.U / primitive.c;
+                double localPressure = primitive.p;
+                ofstreamMach << cells.at(k).tx << " " << localMachNumber << std::endl;
+                ofstreamPressure << cells.at(k).tx << " " << localPressure << std::endl;
+            }
+            ofstreamMach.close();
+            ofstreamPressure.close();
+            std::cout << "timestep " << reps << " recorded successfully" << std::endl;
         }
     }
+
+    std::ofstream outputStreamWing(Def::defaultPath + "\\" + NAME + std::to_string(reps) + ".dat");
+//    outputStreamWing << "\"X\", \"Y\", \"Z\", \"MACH_NUMBER\"\n";
+    for (int j = 0; j < NACA::wingLength; ++j) {
+        int k = Def::xCells * Def::gl + Def::gl + NACA::wingStart + j;
+        Primitive primitive = Primitive::computePV(cells.at(k).w);
+        double localMachNumber = primitive.U / primitive.c;
+        outputStreamWing << cells.at(k).tx << " " << localMachNumber << std::endl;
+    }
+    outputStreamWing.close();
+    std::cout << "timestep " << reps << " recorded successfully" << std::endl;
 
 
 
     // Write data
-    std::ofstream outputFile(Def::defaultPath + "\\" + NAME + ".dat");
-    for (int i = 0; i < Def::inner; ++i) {
-        int k = Def::innerIndex(i);
-        Primitive pv = Primitive::computePV(cells.at(k).w);
-        double mach = pv.U / pv.c;
+//    std::ofstream outputFile(Def::defaultPath + "\\" + NAME + ".dat");
+//    for (int i = 0; i < Def::inner; ++i) {
+//        int k = Def::innerIndex(i);
+//        Primitive pv = Primitive::computePV(cells.at(k).w);
+//        double mach = pv.U / pv.c;
 //        outputFile << cells.at(k).tx << " " << cells.at(k).ty << " " << cells.at(k).w.r1 << "\n";
-        outputFile << cells.at(k).tx << " " << cells.at(k).ty << " " << mach << "\n";
-    } outputFile.close();
+//        outputFile << cells.at(k).tx << " " << cells.at(k).ty << " " << mach << "\n";
+//    } outputFile.close();
 
 //    std::ofstream outputVec(Def::defaultPath + "\\" + "mach_along_bot_8000_150x50.dat");
 //    for (int i = 0; i < Def::xInner; ++i) {
@@ -202,10 +229,11 @@ int main() {
 //        outputVec << cells.at(k).tx << " " << mach << "\n";
 //    } outputVec.close();
 
-    if(Def::error) {
-        std::cout << "error at rep " << reps << std::endl;
-    }
+    if (Def::error) {std::cout << "error at rep " << reps << std::endl;}
 
     std::cout << "nashledanou" << std::endl;
     return 0;
 }
+
+//todo snadný přepínání mezi režimama
+//todo lepší práce s daty - program vytvoří vlastní složku, bude linkovat s pythonem apod

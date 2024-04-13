@@ -13,7 +13,7 @@ class Primitive {
 
 public:
     double rho, rhoU, rhoV, rhoE;
-    double U, u, v, c, p, h;
+    double U, u, v, c, p, h; //U totožno q
 
     // Constructor
     Primitive() = default;

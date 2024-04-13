@@ -13,8 +13,8 @@
 class NACA {
 
 public:
-    static constexpr int wingStart = 30; //off by one, for šur
-    static constexpr int wingLength = 200; //off by one, for šur
+    static constexpr int wingStart = 30; //off by one, for šur -?
+    static constexpr int wingLength = 200; //off by one, for šur -?
 
     static void updateInlet(std::unordered_map<int, Cell>& cells);
 

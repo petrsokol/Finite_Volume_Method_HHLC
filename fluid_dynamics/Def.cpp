@@ -12,7 +12,7 @@ const double Def::KAPPA = 1.4;
 const double Def::P0 = 1;
 const double Def::P2 = 0.656;
 const double Def::RHO = 1;
-const double Def::ALPHA_INFINITY = M_PI * 1.25 / 180;
+const double Def::ALPHA_INFINITY = 1.25 * M_PI / 180;
 const double Def::EPSILON = -8;
 
 const double Def::rhoInitial = 1;
@@ -42,5 +42,5 @@ const double Def::dx = (xUpperBound - xLowerBound) / xInner;
 bool Def::error = false;
 
 int Def::innerIndex(int i) {
-    return firstInner + i%xInner + (i/xInner)*xCells;
+    return firstInner + i % xInner + (i / xInner) * xCells;
 }
